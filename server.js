@@ -3,7 +3,6 @@ const app = express();
 const port = 8383;
 const { db } = require('./firebase')
 
-const { readDb, writeDb } = require('./dbFunctions');
 
 app.use(express.static('public'));
 app.use(express.json());
@@ -24,9 +23,6 @@ app.post('/', async (req, res) => {
             }, {}),
         }
     }, { merge: true })
-
-    const currentPolls = readDb();
-
 
     res.redirect('/' + id);
 });
