@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey We Go</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+        integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        * {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+            font-family: 'Open Sans', sans-serif;
+            transition: all 150ms;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background: #0f172a;
+            color: white;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            width: 90vw;
+            max-width: 800px;
+        }
+
+        form h1 {
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: hsl(180, 100%, 80%);
+            text-shadow: 0 0 8px skyblue;
+            text-align: center;
+            user-select: none;
+            margin: 32px 0;
+        }
+
+        form>input,
+        form label,
+        form label input {
+            width: 100%;
+            background: transparent;
+            outline: none;
+            color: white;
+            padding: 6px;
+            border: none;
+        }
+
+        form div {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 5px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        form div div {
+            color: greenyellow;
+            cursor: pointer;
+            width: fit-center;
+        }
+
+        form div div:hover {
+            transform: scale(1.25);
+        }
+
+        form div input {
+            width: 100%;
+            background: cyan;
+            color: black;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 18px auto;
+            border: 1px solid transparent;
+        }
+
+        form div input:hover {
+            background: transparent;
+            color: cyan;
+            border: 1px solid cyan;
+        }
+
+        #question {
+            border: 1px solid transparent;
+            border-bottom: 1px solid aqua;
+            margin: 4px 0 12px 0;
+            font-size: 1.2rem;
+            padding: 14px 12px;
+        }
+
+        #question:focus {
+            border: 1px solid aqua;
+        }
+
+        #question:hover {
+            opacity: .8;
+        }
+
+        .options {
+            position: relative;
+            padding-left: 20px;
+            flex: 1;
+            color: white;
+            border-bottom: 1px solid transparent;
+            padding: 6px 3px;
+        }
+
+        .options:hover {
+            border-bottom: 1px solid greenyellow;
+        }
+
+        form label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <form action="#" onsubmit="functSubmit()">
+        <h1>SURVEY WE GO</h1>
+        <input type="text" require id="question" placeholder="Enter your question..." />
+        <label>
+            <input type="text" required class="options" placeholder="Option 1" />
+        </label>
+        <label>
+            <input type="text" required class="options" placeholder="Option 2" />
+        </label>
+        <div id="buttons">
+            <div id="add"><i class="fa-solid fa-plus"></i></div>
+            <input type="submit" value="POLL" id="submit" />
+        </div>
+
+    </form>
+
+    <script>
+        const labels=document.querySelectorAll('form label')
+
+        //Add icons to options
+        labels.forEach(label => {
+            label.innerHTML=`<i class="fa-solid fa-atom"></i>`+label.innerHTML
+        })
+
+        //Add more options
+        const addBtn=document.getElementById('add')
+        const form=document.querySelector('form')
+        const btns=document.getElementById('buttons')
+        function addOption() {
+            const newNode=document.createElement('label')
+            form.insertBefore(newNode, btns)
+            document.querySelector('label:last-of-type').innerHTML=`<i class="fa-solid fa-atom"></i>`+`<input type="text" required class="options" placeholder="..."/>`
+        }
+        addBtn.addEventListener('click', addOption)
+
+        //Submit poll
+        const submitBtn=document.getElementById('submit')
+        async function functSubmit(e) {
+            const question=document.getElementById('question').value
+            const options=new Set(Array.from(document.querySelectorAll('.options')).map(option => option.value))
+
+            const idsRes=await fetch('/ids')
+            const { ids }=await idsRes.json()
+            const id=ids.length===0? 1:Math.max(...ids)+1
+
+            const res=await fetch('/', {
+                method: 'POST',
+                headers: {
+                    "Content-type": "application/json"
+                },
+                body: JSON.stringify({
+                    id,
+                    question,
+                    options
+                })
+            })
+
+            window.location.href=`/${id}`
+        }
+
+    </script>
+</body>
+
+</html>

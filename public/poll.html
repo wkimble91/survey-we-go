@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POLL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+        integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        * {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+            font-family: 'Open Sans', sans-serif;
+            transition: all 150ms;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background: #0f172a;
+            color: white;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        main > h1 {
+            font-weight: 800;
+            -webkit-text-stroke: 2px cyan;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            user-select: none;
+            margin: 32px 0;
+            text-transform: uppercase;
+            border-bottom: 1px solid cyan;
+        }
+        
+        #options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+
+        ul li {
+            text-transform: capitalize;
+            list-style: none;
+            user-select: none;
+            cursor: pointer;
+            width: 100%;
+            border: 1px solid transparent;
+            padding: 8px;
+        }
+
+        ul li:hover {
+            color: greenyellow;
+            background: black;
+            border-left: 1px solid greenyellow;
+        }
+
+        ul li i {
+            padding: 0 10px 0 0;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1></h1>
+        <ul id="options"></ul>
+    </main>
+
+    <script>
+        const id = window.location.pathname.replaceAll('/', '')
+
+        const question = document.querySelector('main > h1')
+        const optionsList = document.querySelector('ul')
+        let optionsFromServer = []
+        async function onLoad() {
+            const idsRes = await fetch('/ids')
+            const { ids } = await idsRes.json()
+            if (!ids.includes(id)) {
+                window.location.href = '/'
+            }
+
+            const res = await fetch('/data/' + id)
+            const { data } = await res.json()
+            optionsFromServer = data.options
+            question.innerText = data.question + (data.question.includes('?') ? '' : '?')
+
+            let newInnerListHTML = ''
+            Object.keys(data.options).forEach((option, index) => {
+                newInnerListHTML += `<li id="${index}"><i class="fa-solid fa-atom"></i>${option}</li>`
+            })
+            optionsList.innerHTML = newInnerListHTML
+
+            const optionsLi = document.querySelectorAll('li')
+            optionsLi.forEach(option => {
+                option.addEventListener('click', pplClick)
+            })
+        }
+
+        onLoad()
+
+        const linearGradients = ['#00C9FF, #92FE9D', '#FC00FF, #00DBDE', '#D38312, #A83279', '#fdfc47, #24fe41']
+
+        function pplClick(index) {
+            const option = index.target.id
+            const maxNumberOfVotes = Math.max(...Object.values(optionsFromServer))
+
+            const optionsLi = document.querySelectorAll('li')
+            optionsLi.forEach(val => {
+                const option = val.id //send this off to server
+                val.removeEventListener('click', pplClick)
+
+                val.style.background = `linear-gradient(to right, ${linearGradients[Math.floor(Math.random() * linearGradients.length)]})`
+                val.style.color = '#0f172a'
+
+                if (maxNumberOfVotes !== 0) {
+                    console.log(optionsFromServer[option])
+                    val.style.width = `${(optionsFromServer[option] / maxNumberOfVotes) * 100}%`
+                }
+            })
+        }
+
+    </script>
+</body>
+
+</html>
