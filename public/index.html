@@ -33,6 +33,7 @@
 
         form {
             display: flex;
+            flex: 1;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -63,13 +64,14 @@
             border: none;
         }
 
-        form div {
+        form > div {
             display: flex;
+            flex: 1;
             flex-direction: column;
             width: 100%;
             gap: 5px;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
         }
 
         form div div {
@@ -139,7 +141,7 @@
 </head>
 
 <body>
-    <form action="#" onsubmit="functSubmit()">
+    <form action="#" onsubmit="functSubmit(event)">
         <h1>SURVEY WE GO</h1>
         <input type="text" require id="question" placeholder="Enter your question..." />
         <label>
@@ -177,8 +179,10 @@
         //Submit poll
         const submitBtn=document.getElementById('submit')
         async function functSubmit(e) {
+            e.preventDefault()
             const question=document.getElementById('question').value
-            const options=new Set(Array.from(document.querySelectorAll('.options')).map(option => option.value))
+            const options=Array.from(document.querySelectorAll('.options')).map(option => option.value)
+            const uniqueOptions = [...new Set(options)]
 
             const idsRes=await fetch('/ids')
             const { ids }=await idsRes.json()
@@ -192,11 +196,13 @@
                 body: JSON.stringify({
                     id,
                     question,
-                    options
+                    options: uniqueOptions
                 })
             })
-
-            window.location.href=`/${id}`
+            if (res.redirected) {
+            window.location.href= res.url
+            }
+            return
         }
 
     </script>

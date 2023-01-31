@@ -29,19 +29,20 @@
             min-height: 100vh;
             background: #0f172a;
             color: white;
+            padding: 4px;
         }
 
         main {
             max-width: 800px;
             margin: 0 auto;
             display: flex;
+            flex: 1;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             gap: 20px;
         }
 
-        main > h1 {
+        main>h1 {
             font-weight: 800;
             -webkit-text-stroke: 2px cyan;
             -webkit-text-fill-color: transparent;
@@ -51,7 +52,7 @@
             text-transform: uppercase;
             border-bottom: 1px solid cyan;
         }
-        
+
         #options {
             display: flex;
             flex-direction: column;
@@ -67,6 +68,8 @@
             width: 100%;
             border: 1px solid transparent;
             padding: 8px;
+            white-space: nowrap;
+            max-width: 100% !important;
         }
 
         ul li:hover {
@@ -78,6 +81,40 @@
         ul li i {
             padding: 0 10px 0 0;
         }
+
+        .lins:nth-child(3n) {
+            background: linear-gradient(to right, #00C9FF, #92FE9D);
+        }
+
+        .lins:nth-child(3n+1) {
+            background: linear-gradient(to right, #FC00FF, #00DBDE);
+        }
+
+        .lins:nth-child(3n+2) {
+            background: linear-gradient(to right, #D38312, #A83279);
+        }
+
+        #url {
+            color: greenyellow;
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 2px 4px;
+            margin: 4px auto;
+        }
+
+        footer {
+            display: grid;
+            place-items: center;
+        }
+
+        footer:hover {
+            color: greenyellow;
+            cursor: pointer;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
     </style>
 </head>
 
@@ -86,9 +123,14 @@
         <h1></h1>
         <ul id="options"></ul>
     </main>
+    <div id="url"></div>
+    <footer><a href="/"><i class="fa-solid fa-house"></i></a></footer>
 
     <script>
         const id = window.location.pathname.replaceAll('/', '')
+        const currURL = window.location.href
+        const urlDiv = document.getElementById('url')
+        urlDiv.innerText = currURL
 
         const question = document.querySelector('main > h1')
         const optionsList = document.querySelector('ul')
@@ -107,11 +149,11 @@
 
             let newInnerListHTML = ''
             Object.keys(data.options).forEach((option, index) => {
-                newInnerListHTML += `<li id="${index}"><i class="fa-solid fa-atom"></i>${option}</li>`
+                newInnerListHTML += `<li id="${option}"><i class="fa-solid fa-atom"></i>${option}</li>`
             })
             optionsList.innerHTML = newInnerListHTML
 
-            const optionsLi = document.querySelectorAll('li')
+            const optionsLi=document.querySelectorAll('li')
             optionsLi.forEach(option => {
                 option.addEventListener('click', pplClick)
             })
@@ -119,27 +161,43 @@
 
         onLoad()
 
-        const linearGradients = ['#00C9FF, #92FE9D', '#FC00FF, #00DBDE', '#D38312, #A83279', '#fdfc47, #24fe41']
-
-        function pplClick(index) {
-            const option = index.target.id
+        async function pplClick(index) {
+            const selected=index.target.id
             const maxNumberOfVotes = Math.max(...Object.values(optionsFromServer))
 
             const optionsLi = document.querySelectorAll('li')
             optionsLi.forEach(val => {
-                const option = val.id //send this off to server
+                const option=val.id //send this off to server
                 val.removeEventListener('click', pplClick)
-
-                val.style.background = `linear-gradient(to right, ${linearGradients[Math.floor(Math.random() * linearGradients.length)]})`
-                val.style.color = '#0f172a'
-
+                val.classList.add('lins')
                 if (maxNumberOfVotes !== 0) {
-                    console.log(optionsFromServer[option])
-                    val.style.width = `${(optionsFromServer[option] / maxNumberOfVotes) * 100}%`
+                    if (selected == option) {
+                        val.style.width = `${((optionsFromServer[option] + 1) / maxNumberOfVotes) * 100}%`
+                    } else {
+                        val.style.width = `${(optionsFromServer[option] / maxNumberOfVotes) * 100}%`
+                    }
+
+                } else {
+                    if (selected == option) {
+                        val.style.width = '100%'
+                    } else {
+                        val.style.width = '0%'
+                    }
                 }
             })
-        }
 
+            //send result to server
+            const res = await fetch('/vote', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id,
+                    vote: selected
+                })
+            })
+        }
     </script>
 </body>
 
