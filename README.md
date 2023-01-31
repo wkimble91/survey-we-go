@@ -1,7 +1,7 @@
-# survey-we-go
+# Survey We Go!
 ==================================================
 
- A simple survey application, built on [Node.js], [Firebase], & [Express].
+ A simple surveying application. Build surveys, vote on surveys, and share surveys. Built on [Node.js], [Firebase], & [Express].
 
 [Node.js]: https://nodejs.org/en/
 [Firebase]: https://firebase.google.com/
